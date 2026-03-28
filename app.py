@@ -25,18 +25,18 @@ def meteoritos():
             if not API_KEY or not API_URL:
                 print('API_KEY or API_URL missing')
                 error = 'API_KEY or API_URL missing'
+            else:
+                params = {
+                    "api_key": API_KEY,
+                    "start_date": start_date,
+                    "end_date": end_date
+                }
 
-            params = {
-                "api_key": API_KEY,
-                "start_date": start_date,
-                "end_date": end_date
-            }
+                response = requests.get(API_URL, params=params, timeout=10)
+                response.raise_for_status()
+                json_data = response.json()
 
-            response = requests.get(API_URL, params=params, timeout=10)
-            response.raise_for_status()
-            json_data = response.json()
-
-            data = json_data.get("near_earth_objects")
+                data = json_data.get("near_earth_objects")
 
         except requests.exceptions.RequestException as e:
             print('Request Error: ', e)
