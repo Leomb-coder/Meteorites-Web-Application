@@ -4,19 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Portokalia</title>
+    <title>Asteroid App</title>
 </head>
 <body>
 <h1>Asteroids Web Application</h1>
 <form method="get">
     <label for="start_date">Insert the starting date</label><br>
-    <input type="date" name="start_date" id="start_date"><br><br>
+    <input type="date" name="start_date" id="start_date" required><br><br>
     <label for="end_date">Insert the ending date</label><br>
-    <input type="date" name="end_date" id="end_date"><br><br>
+    <input type="date" name="end_date" id="end_date" required><br><br>
     <button type="submit">Submit</button>
 </form>
 <br><br>
 <div class="container">
+{% if data %}
     {% for date, asteroids in data.items() %}
         <div class="date-container">
             <h2>Recognized in {{ date }}:</h2>
@@ -42,14 +43,14 @@
                                 </li>
                             </ul>
                         </li>
-                        {% if asteroid.close_approach_data[0] %}
+                        {% if asteroid.close_approach_data %}
                             {% set approach = asteroid.close_approach_data[0] %}
                             <li><strong>Relative Velocity:</strong>
                                 <ul>
                                     <li>Kilometers per
                                         Second: {{ approach.relative_velocity.kilometers_per_second | float | round(2) }} Km/s</li>
                                     <li>Kilometers per
-                                        hour: {{ approach.relative_velocity.kilometers_per_hour | float | round(2) }} Km/s</li>
+                                        hour: {{ approach.relative_velocity.kilometers_per_hour | float | round(2) }} Km/h</li>
                                 </ul>
                             </li>
                             <li>Orbiting Body: <u>{{ approach.orbiting_body }}</u></li>
@@ -64,6 +65,11 @@
             {% endfor %}
         </div>
     {% endfor %}
+{% endif %}
+
+{% if error %}
+    <h2 style="color: red">Error: {{ error }}</h2>
+{% endif %}
 </div>
 </body>
 </html>
