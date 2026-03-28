@@ -1,4 +1,4 @@
-# Meteorites-Web-Application
+# Asteroids-Web-Application
 Web Application made to manage and analize near Earth Asteroid information using [NASA's API Asteroids - NeoWs](https://api.nasa.gov/)
 
 This project was made for me to learn more about Web Applications and Hosting, and im really into Astronomy, so thats where the idea came from --
