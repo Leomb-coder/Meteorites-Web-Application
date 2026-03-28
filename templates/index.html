@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Portokalia</title>
+</head>
+<body>
+<h1>Meteorites Web Application</h1>
+<form method="get">
+    <label for="start_date">Insert the starting date</label><br>
+    <input type="date" name="start_date" id="start_date"><br><br>
+    <label for="end_date">Insert the ending date</label><br>
+    <input type="date" name="end_date" id="end_date"><br><br>
+    <button type="submit">Submit</button>
+</form>
+<br><br>
+<div class="container">
+    {% for date, asteroids in data.items() %}
+        <div class="date-container">
+            <h2>Recognized in {{ date }}:</h2>
+            {% for asteroid in asteroids %}
+                {% if asteroid %}
+                    <h3>Name: {{ asteroid.name }}</h3>
+                    <ul>
+                        <li>Id: {{ asteroid.id }}</li>
+                        <li>Absolute Magnitude: {{ asteroid.absolute_magnitude_h }} H</li>
+                        <li>Potentially Hazardous: <u>{{ asteroid.is_potentially_hazardous_asteroid }}</u></li>
+                        {% if asteroid.close_approach_data[0] %}
+                            {% set approach = asteroid.close_approach_data[0] %}
+                            <li>Close Approach Date: {{ approach.close_approach_date_full }}</li>
+                        {% else %}
+                            {% set approach = None %}
+                        {% endif %}
+                        <li><strong>Estimated Diameter in Meters:</strong>
+                            {% set estimated_diameter_m = asteroid.estimated_diameter.meters %}
+                            <ul>
+                                <li>Min Diameter: {{ estimated_diameter_m.estimated_diameter_min | float | round(2) }} m
+                                </li>
+                                <li>Max Diameter: {{ estimated_diameter_m.estimated_diameter_max | float | round(2) }} m
+                                </li>
+                            </ul>
+                        </li>
+                        {% if asteroid.close_approach_data[0] %}
+                            {% set approach = asteroid.close_approach_data[0] %}
+                            <li><strong>Relative Velocity:</strong>
+                                <ul>
+                                    <li>Kilometers per
+                                        Second: {{ approach.relative_velocity.kilometers_per_second | float | round(2) }} Km/s</li>
+                                    <li>Kilometers per
+                                        hour: {{ approach.relative_velocity.kilometers_per_hour | float | round(2) }} Km/s</li>
+                                </ul>
+                            </li>
+                            <li>Orbiting Body: <u>{{ approach.orbiting_body }}</u></li>
+                        {% else %}
+                            {% set approach = None %}
+                        {% endif %}
+                    </ul>
+                    <hr>
+                {% else %}
+                    <p>No Asteroid Data</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+</body>
+</html>
