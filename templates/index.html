@@ -3,75 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='Logo_Page.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <title>Asteroid App</title>
 </head>
 <body>
-<h1>Asteroids Web Application</h1>
-<form method="get">
-    <label for="start_date">Insert the starting date</label><br>
-    <input type="date" name="start_date" id="start_date" required><br><br>
-    <label for="end_date">Insert the ending date</label><br>
-    <input type="date" name="end_date" id="end_date" required><br><br>
-    <button type="submit">Submit</button>
-</form>
-<br><br>
-<div class="container">
-{% if data %}
-    {% for date, asteroids in data.items() %}
-        <div class="date-container">
-            <h2>Recognized in {{ date }}:</h2>
-            {% for asteroid in asteroids %}
-                {% if asteroid %}
-                    <h3>Name: {{ asteroid.name }}</h3>
-                    <ul>
-                        <li>Id: {{ asteroid.id }}</li>
-                        <li>Absolute Magnitude: {{ asteroid.absolute_magnitude_h }} H</li>
-                        <li>Potentially Hazardous: <u>{{ asteroid.is_potentially_hazardous_asteroid }}</u></li>
-                        {% if asteroid.close_approach_data[0] %}
-                            {% set approach = asteroid.close_approach_data[0] %}
-                            <li>Close Approach Date: {{ approach.close_approach_date_full }}</li>
-                        {% else %}
-                            {% set approach = None %}
-                        {% endif %}
-                        <li><strong>Estimated Diameter in Meters:</strong>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="logo-area">
+        <!-- Logo goes here -->
+        <div class="logo-placeholder">
+            <span class="logo-icon"><img src="{{ url_for('static', filename='Logo.svg') }}" height="50px"></span>
+            <span class="logo-text">ASTRO<br><span>TRACK</span></span>
+        </div>
+    </div>
+
+    <div class="sidebar-content">
+        <p class="sidebar-label">Search Window</p>
+        <form method="get" class="search-form">
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input type="date" name="start_date" id="start_date" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <input type="date" name="end_date" id="end_date" required>
+            </div>
+            <button type="submit" class="submit-btn">
+                <span>Scan</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </form>
+
+        <div class="sidebar-note">
+            <span class="note-icon">⚠</span>
+            Max range: 7 days
+        </div>
+    </div>
+</aside>
+
+<!-- Main content -->
+<main class="main">
+    <header class="page-header">
+        <div class="header-top">
+            <h1 class="page-title">Near-Earth Objects</h1>
+            {% if data %}
+            <span class="result-badge">{{ data | length }} day{% if data | length != 1 %}s{% endif %} tracked</span>
+            {% endif %}
+        </div>
+        <p class="page-subtitle">Close-approach data from NASA's NeoWs API</p>
+    </header>
+
+    <div class="content-area">
+        {% if data %}
+        <div class="days-grid">
+            {% for date, asteroids in data.items() %}
+            <div class="day-column">
+                <div class="day-header">
+                    <span class="day-label">{{ date }}</span>
+                    <span class="asteroid-count">{{ asteroids | length }} object{% if asteroids | length != 1 %}s{% endif %}</span>
+                </div>
+
+                <div class="cards-list">
+                    {% for asteroid in asteroids %}
+                        {% if asteroid %}
+                        {% set is_hazardous = asteroid.is_potentially_hazardous_asteroid %}
+                        <div class="asteroid-card {% if is_hazardous %}hazardous{% endif %}">
+                            {% if is_hazardous %}
+                            <div class="hazard-tag">⚠ Hazardous</div>
+                            {% endif %}
+
+                            <div class="card-top">
+                                <h3 class="asteroid-name">{{ asteroid.name }}</h3>
+                                <span class="asteroid-id">{{ asteroid.id }}</span>
+                            </div>
+
+                            <div class="card-stat">
+                                <span class="stat-label">Abs. Magnitude</span>
+                                <span class="stat-value">{{ asteroid.absolute_magnitude_h }} H</span>
+                            </div>
+
                             {% set estimated_diameter_m = asteroid.estimated_diameter.meters %}
-                            <ul>
-                                <li>Min Diameter: {{ estimated_diameter_m.estimated_diameter_min | float | round(2) }} m
-                                </li>
-                                <li>Max Diameter: {{ estimated_diameter_m.estimated_diameter_max | float | round(2) }} m
-                                </li>
-                            </ul>
-                        </li>
-                        {% if asteroid.close_approach_data %}
-                            {% set approach = asteroid.close_approach_data[0] %}
-                            <li><strong>Relative Velocity:</strong>
-                                <ul>
-                                    <li>Kilometers per
-                                        Second: {{ approach.relative_velocity.kilometers_per_second | float | round(2) }} Km/s</li>
-                                    <li>Kilometers per
-                                        hour: {{ approach.relative_velocity.kilometers_per_hour | float | round(2) }} Km/h</li>
-                                </ul>
-                            </li>
-                            <li>Orbiting Body: <u>{{ approach.orbiting_body }}</u></li>
+                            <div class="card-stat">
+                                <span class="stat-label">Diameter</span>
+                                <span class="stat-value">
+                                    {{ estimated_diameter_m.estimated_diameter_min | float | round(1) }}–{{ estimated_diameter_m.estimated_diameter_max | float | round(1) }} m
+                                </span>
+                            </div>
+
+                            {% if asteroid.close_approach_data %}
+                                {% set approach = asteroid.close_approach_data[0] %}
+                                <div class="card-stat">
+                                    <span class="stat-label">Approach</span>
+                                    <span class="stat-value small">{{ approach.close_approach_date_full }}</span>
+                                </div>
+                                <div class="velocity-block">
+                                    <div class="velocity-item">
+                                        <span class="vel-num">{{ approach.relative_velocity.kilometers_per_second | float | round(2) }}</span>
+                                        <span class="vel-unit">km/s</span>
+                                    </div>
+                                    <div class="vel-sep"></div>
+                                    <div class="velocity-item">
+                                        <span class="vel-num">{{ approach.relative_velocity.kilometers_per_hour | float | round(0) | int }}</span>
+                                        <span class="vel-unit">km/h</span>
+                                    </div>
+                                </div>
+                                <div class="card-stat orbiting">
+                                    <span class="stat-label">Orbiting</span>
+                                    <span class="orbit-pill">{{ approach.orbiting_body }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
                         {% else %}
-                            {% set approach = None %}
+                        <div class="asteroid-card empty-card">
+                            <p>No data available</p>
+                        </div>
                         {% endif %}
-                    </ul>
-                    <hr>
-                {% else %}
-                    <p>No Asteroid Data</p>
-                {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
             {% endfor %}
         </div>
-    {% endfor %}
-{% else %}
-    <h2>Use only a maximum range of 7 days</h2>
-{% endif %}
 
-{% if error %}
-    <h2 style="color: red">Error: {{ error }}</h2>
-{% endif %}
-</div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">☄</div>
+            <h2>No data yet</h2>
+            <p>Select a date range (up to 7 days) and hit Scan to explore near-Earth objects.</p>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="error-banner">
+            <span>⚠</span> {{ error }}
+        </div>
+        {% endif %}
+    </div>
+</main>
+
 </body>
 </html>
